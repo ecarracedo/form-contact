@@ -3,15 +3,15 @@
 # En $secret pongo la clave secreta que me da google.
 # En $token inicializa a traves de POST la clave publica que me llega en g-recaptcha-response
 
-$secret = "6LdyhgAVAAAAAMzcVI9hXh3GePMRmAHTeRjCCn1t";
+$secret = "CLAVE_SECRETA";
 $token = $_POST["g-recaptcha-response"];
 
 # verificarToken() verifica si el token y secret pasan las prueba 
-#y retorna el resultado a $verificado
+# y retorna el resultado a $verificado
 
 $verificado = verificarToken($token, $secret);
 
-# Si no ha pasado la prueba
+# Verifica si $verificado devuelve true o false
 if ($verificado) {
     
     $name = $_POST['name'];
@@ -20,8 +20,8 @@ if ($verificado) {
     $email = $_POST['email'];
     $msg = $_POST['message'];
 
-    $sendTo = 'info@ecarracedo.com.ar';
-    $from = 'EC | Analista de Sistemas <info@ecarracedo.com.ar>';
+    $sendTo = 'CORREO DONDE TIENE QUE ENVIAR LOS DATOS';
+    $from = 'CORREO DEL DESTINATARIO';
     $subject = 'Consulta de ' . $name ;
 
     $emailText = "Recibiste un mensaje de\n=============================\n";
@@ -36,25 +36,28 @@ if ($verificado) {
     'Reply-To: ' . $name . ' ' . $lname . ' <'. $email .'>',
     'Return-Path: ' . $from,
     );
-
     
+    # Al devolver true, se configura el resultado a enviar a contacto.js a traves de json    
     $json = array ('html' => "<p class='alert alert-success' role='alert'>¡Muchas gracias por tu menjase!. En breve recibiras una respuesta.</p>", 'clave' => 1, );
     echo json_encode($json);
-
+    
+    # Se envia el correo
     mail($sendTo, $subject, $emailText, implode("\n", $headers)); 
     
 } else {
     
+    # Verifica si el captcha esta vacio
     if (!isset($_POST["g-recaptcha-response"]) || empty($_POST["g-recaptcha-response"])) {
+        
         $json = array ('html' => "<p class='alert alert-danger' role='alert'>Por favor completar el Captcha.</p>", 'clave' => 0, );
         echo json_encode($json);
-    }else {
+        
+    }else { # Si es hubo un problema con el captcha, aparece el mensaje de error
+        
         $json = array ('html' => "<p class='alert alert-danger' role='alert'>Hubo un error en el Captcha. Por favor intertar de nuevo</p>", 'clave' => 1, );
         echo json_encode($json);
         
     }
-
-  
 }
 
 function verificarToken($token, $claveSecreta)
@@ -87,7 +90,6 @@ function verificarToken($token, $claveSecreta)
     }
 
     # En caso de que no haya regresado false, decodificamos con JSON
-    # https://parzibyte.me/blog/2018/12/26/codificar-decodificar-json-php/
 
     $resultado = json_decode($resultado);
     # La variable que nos interesa para saber si el usuario pasó o no la prueba
@@ -96,14 +98,5 @@ function verificarToken($token, $claveSecreta)
     # Regresamos ese valor, y listo (sí, ya sé que se podría regresar $resultado->success)
     return $pruebaPasada;
 }
-
-
-
-        
-       
-    
- 
-
-    
 
 ?>
